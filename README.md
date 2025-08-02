@@ -1,2 +1,3 @@
-# fhir-resources.rs
-FHIR resources for RUST flexibility of building fhir resources with types and checking.
+# fhir-resources-rs
+
+I am creating this rust library to be used in my applications i am developing for health care purposes written in Rust.
