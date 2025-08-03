@@ -1,6 +1,8 @@
-mod human_name;
-mod identifier;
-mod patient;
+pub mod human_name;
+pub mod identifier;
+pub mod patient;
+pub mod data_types;
+pub mod period;
 
 pub fn add(left: u64, right: u64) -> u64 {
     left + right
