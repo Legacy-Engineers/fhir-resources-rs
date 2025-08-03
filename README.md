@@ -23,12 +23,23 @@ A Rust library for working with FHIR (Fast Healthcare Interoperability Resources
 
 ### ✅ Implemented Resources
 
-- **Patient**: Core patient resource with identifiers and names
+- **Patient**: Complete FHIR Patient resource with all fields
 - **HumanName**: Structured human names with international support
 - **Identifier**: Healthcare identifiers (MRN, SSN, etc.)
 - **Period**: Time periods for healthcare events
+
+### ✅ Implemented Data Types
+
 - **Uri**: FHIR-compliant URI implementation
 - **Code**: FHIR code values with validation
+- **ContactPoint**: Contact information (phone, email, etc.)
+- **Address**: Complete address structure with international support
+- **CodeableConcept**: Coded concepts with coding arrays
+- **Coding**: Individual coding entries
+- **Reference**: Resource references
+- **PatientContact**: Patient contact information
+- **PatientCommunication**: Language communication preferences
+- **PatientLink**: Patient resource links
 
 ### 🌍 International Support
 
@@ -40,10 +51,11 @@ A Rust library for working with FHIR (Fast Healthcare Interoperability Resources
 ### 🔧 Technical Features
 
 - **Type Safety**: Strongly typed Rust implementations
-- **Serialization**: JSON serialization/deserialization support
+- **Serialization**: JSON serialization/deserialization support with FHIR camelCase
 - **Validation**: Basic FHIR validation rules
 - **Testing**: Comprehensive test suite with demo data
 - **Documentation**: Detailed usage examples
+- **FHIR Compliance**: Proper field naming (resourceType in JSON)
 
 ## Installation
 
@@ -61,17 +73,24 @@ use fhir_resources_rs::patient::Patient;
 use fhir_resources_rs::human_name::HumanName;
 use fhir_resources_rs::identifier::Identifier;
 use fhir_resources_rs::data_types::uri::Uri;
+use fhir_resources_rs::data_types::contact_point::ContactPoint;
+use fhir_resources_rs::data_types::address::Address;
 
-// Create a patient
+// Create a complete patient
 let mut patient = Patient::new();
 
-// Add an identifier
+// Add identifiers
 let system_uri = Uri::new_unchecked("https://hospital.example.com/patients".to_string());
 let use_uri = Uri::new_unchecked("official".to_string());
 let identifier = Identifier::new(use_uri, system_uri, "MRN12345".to_string());
 patient.add_identifier(identifier);
 
-// Add a name
+// Set patient details
+patient.set_active(Some(true));
+patient.set_gender(Some("male".to_string()));
+patient.set_birth_date(Some("1980-05-15".to_string()));
+
+// Add names
 let mut name = HumanName::new(
     "official".to_string(),
     "Dr. John Smith".to_string(),
@@ -81,7 +100,19 @@ name.set_given(vec!["John".to_string()]);
 name.set_prefix(vec!["Dr.".to_string()]);
 patient.add_name(name);
 
-// Serialize to JSON
+// Add contact information
+let phone = ContactPoint::new("phone".to_string(), "+1-555-123-4567".to_string());
+patient.add_telecom(phone);
+
+// Add address
+let mut address = Address::new();
+address.set_use(Some("home".to_string()));
+address.add_line("123 Main Street".to_string());
+address.set_city(Some("Anytown".to_string()));
+address.set_state(Some("CA".to_string()));
+patient.add_address(address);
+
+// Serialize to JSON (uses camelCase field names)
 let json = serde_json::to_string_pretty(&patient).unwrap();
 println!("{}", json);
 ```
@@ -97,6 +128,7 @@ cargo test --test patient_tests -- --nocapture
 cargo test --test human_name_tests -- --nocapture
 cargo test --test period_tests -- --nocapture
 cargo test --test identifier_tests -- --nocapture
+cargo test --test complete_patient_tests -- --nocapture
 ```
 
 ## Project Structure
@@ -104,44 +136,54 @@ cargo test --test identifier_tests -- --nocapture
 ```
 fhir-resources-rs/
 ├── src/
-│   ├── lib.rs              # Main library entry point
-│   ├── patient.rs          # Patient resource implementation
-│   ├── human_name.rs       # HumanName implementation
-│   ├── identifier.rs       # Identifier implementation
-│   ├── period.rs           # Period implementation
+│   ├── lib.rs                    # Main library entry point
+│   ├── patient.rs                # Complete FHIR Patient resource
+│   ├── human_name.rs             # HumanName implementation
+│   ├── identifier.rs             # Identifier implementation
+│   ├── period.rs                 # Period implementation
+│   ├── patient_contact.rs        # Patient contact information
+│   ├── patient_communication.rs  # Patient communication preferences
+│   ├── patient_link.rs           # Patient resource links
 │   └── data_types/
-│       ├── mod.rs          # Data types module
-│       ├── uri.rs          # URI implementation
-│       └── code.rs         # Code implementation
-├── tests/                  # Integration tests
-│   ├── patient_tests.rs    # Patient resource tests
-│   ├── human_name_tests.rs # HumanName tests
-│   ├── period_tests.rs     # Period tests
-│   └── identifier_tests.rs # Identifier tests
-└── docs/                   # Documentation
-    ├── getting_started.md  # Getting started guide
-    ├── api_reference.md    # API reference
-    └── examples.md         # Usage examples
+│       ├── mod.rs                # Data types module
+│       ├── uri.rs                # URI implementation
+│       ├── code.rs               # Code implementation
+│       ├── contact_point.rs      # ContactPoint implementation
+│       ├── address.rs            # Address implementation
+│       ├── codeable_concept.rs   # CodeableConcept and Coding
+│       └── reference.rs          # Reference implementation
+├── tests/                        # Integration tests
+│   ├── patient_tests.rs          # Basic Patient tests
+│   ├── human_name_tests.rs       # HumanName tests
+│   ├── period_tests.rs           # Period tests
+│   ├── identifier_tests.rs       # Identifier tests
+│   └── complete_patient_tests.rs # Complete Patient tests
+└── docs/                         # Documentation
+    ├── getting_started.md        # Getting started guide
+    ├── api_reference.md          # API reference
+    └── examples.md               # Usage examples
 ```
 
 ## Limitations
 
 ### ❌ Current Limitations
 
-- **Not FHIR Compliant**: This is not a complete FHIR implementation
-- **Limited Resources**: Only basic resources implemented
-- **No Validation**: Limited FHIR validation rules
+- **Partial FHIR Compliance**: Complete Patient resource implemented, but not all FHIR resources
+- **Limited Resources**: Only Patient resource fully implemented
+- **Basic Validation**: Limited FHIR validation rules
 - **No Extensions**: FHIR extensions not supported
-- **No References**: Resource references not implemented
+- **Limited References**: Basic Reference type implemented
 - **No Search**: No search or query capabilities
 - **No Server**: No FHIR server implementation
 
 ### 🔄 Planned Features
 
-- [ ] Complete FHIR R4 compliance
+- [x] Complete FHIR Patient resource
+- [x] ContactPoint, Address, CodeableConcept data types
+- [x] Patient contact, communication, and link types
 - [ ] More resource types (Observation, Medication, etc.)
+- [ ] Complete FHIR R4 compliance
 - [ ] FHIR validation rules
-- [ ] Resource references
 - [ ] FHIR extensions support
 - [ ] Search and query capabilities
 - [ ] FHIR server implementation
