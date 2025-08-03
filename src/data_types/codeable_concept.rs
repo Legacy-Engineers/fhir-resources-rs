@@ -1,5 +1,4 @@
 use serde::{Deserialize, Serialize};
-use crate::data_types::code::Code;
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct CodeableConcept {
