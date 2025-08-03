@@ -67,6 +67,16 @@ impl Patient {
     pub fn set_names(&mut self, names: Vec<HumanName>) {
         self.name = names;
     }
+
+    /// Converts the Patient to a JSON string.
+    pub fn to_json(&self) -> String {
+        serde_json::to_string(self).unwrap()
+    }
+
+    /// Converts a JSON string to a Patient.
+    pub fn from_json(json: &str) -> Result<Self, serde_json::Error> {
+        serde_json::from_str(json)
+    }
 }
 
 impl Default for Patient {

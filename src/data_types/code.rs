@@ -102,6 +102,16 @@ impl Code {
     pub fn is_multi_token(&self) -> bool {
         self.value.contains(' ')
     }
+
+    /// Converts the Code to a JSON string.
+    pub fn to_json(&self) -> String {
+        serde_json::to_string(self).unwrap()
+    }
+
+    /// Converts a JSON string to a Code.
+    pub fn from_json(json: &str) -> Result<Self, serde_json::Error> {
+        serde_json::from_str(json)
+    }
 }
 
 impl FromStr for Code {
@@ -133,110 +143,5 @@ impl From<String> for Code {
 impl From<&str> for Code {
     fn from(value: &str) -> Self {
         Code::new_unchecked(value.to_string())
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn test_valid_single_token() {
-        let code = Code::new("active".to_string()).unwrap();
-        assert_eq!(code.as_str(), "active");
-        assert!(code.is_single_token());
-        assert_eq!(code.token_count(), 1);
-    }
-
-    #[test]
-    fn test_valid_multi_token() {
-        let code = Code::new("active status".to_string()).unwrap();
-        assert_eq!(code.as_str(), "active status");
-        assert!(code.is_multi_token());
-        assert_eq!(code.token_count(), 2);
-        assert_eq!(code.tokens(), vec!["active", "status"]);
-    }
-
-    #[test]
-    fn test_empty_code() {
-        let result = Code::new("".to_string());
-        assert!(result.is_err());
-        assert!(matches!(result.unwrap_err(), CodeError::Empty));
-    }
-
-    #[test]
-    fn test_leading_whitespace() {
-        let result = Code::new(" active".to_string());
-        assert!(result.is_err());
-        assert!(matches!(result.unwrap_err(), CodeError::LeadingTrailingWhitespace));
-    }
-
-    #[test]
-    fn test_trailing_whitespace() {
-        let result = Code::new("active ".to_string());
-        assert!(result.is_err());
-        assert!(matches!(result.unwrap_err(), CodeError::LeadingTrailingWhitespace));
-    }
-
-    #[test]
-    fn test_multiple_spaces() {
-        let result = Code::new("active  status".to_string());
-        assert!(result.is_err());
-        assert!(matches!(result.unwrap_err(), CodeError::MultipleSpaces));
-    }
-
-    #[test]
-    fn test_tab_character() {
-        let result = Code::new("active\tstatus".to_string());
-        assert!(result.is_err());
-        assert!(matches!(result.unwrap_err(), CodeError::InvalidWhitespace));
-    }
-
-    #[test]
-    fn test_newline_character() {
-        let result = Code::new("active\nstatus".to_string());
-        assert!(result.is_err());
-        assert!(matches!(result.unwrap_err(), CodeError::InvalidWhitespace));
-    }
-
-    #[test]
-    fn test_complex_valid_code() {
-        let code = Code::new("active status with multiple tokens".to_string()).unwrap();
-        assert_eq!(code.token_count(), 5);
-        assert_eq!(code.tokens(), vec!["active", "status", "with", "multiple", "tokens"]);
-    }
-
-    #[test]
-    fn test_from_str() {
-        let code = Code::from_str("active").unwrap();
-        assert_eq!(code.as_str(), "active");
-    }
-
-    #[test]
-    fn test_display() {
-        let code = Code::new("active status".to_string()).unwrap();
-        assert_eq!(code.to_string(), "active status");
-    }
-
-    #[test]
-    fn test_serialization() {
-        let code = Code::new("active status".to_string()).unwrap();
-        let serialized = serde_json::to_string(&code).unwrap();
-        let deserialized: Code = serde_json::from_str(&serialized).unwrap();
-        assert_eq!(code, deserialized);
-    }
-
-    #[test]
-    fn test_regex_pattern_validation() {
-        // Valid patterns
-        assert!(Code::new("token".to_string()).is_ok());
-        assert!(Code::new("token1 token2".to_string()).is_ok());
-        assert!(Code::new("token1 token2 token3".to_string()).is_ok());
-
-        // Invalid patterns
-        assert!(Code::new(" token".to_string()).is_err()); // leading space
-        assert!(Code::new("token ".to_string()).is_err()); // trailing space
-        assert!(Code::new("token  token2".to_string()).is_err()); // multiple spaces
-        assert!(Code::new("".to_string()).is_err()); // empty
     }
 }

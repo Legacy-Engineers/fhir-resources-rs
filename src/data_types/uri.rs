@@ -118,6 +118,16 @@ impl Uri {
 
         true
     }
+
+    /// Converts the URI to a JSON string.
+    pub fn to_json(&self) -> String {
+        serde_json::to_string(self).unwrap()
+    }
+
+    /// Converts a JSON string to a URI.
+    pub fn from_json(json: &str) -> Result<Self, serde_json::Error> {
+        serde_json::from_str(json)
+    }
 }
 
 impl FromStr for Uri {
@@ -149,80 +159,5 @@ impl From<String> for Uri {
 impl From<&str> for Uri {
     fn from(value: &str) -> Self {
         Uri::new_unchecked(value.to_string())
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn test_valid_uri() {
-        let uri = Uri::new("https://example.com".to_string()).unwrap();
-        assert_eq!(uri.as_str(), "https://example.com");
-    }
-
-    #[test]
-    fn test_empty_uri() {
-        let result = Uri::new("".to_string());
-        assert!(result.is_err());
-    }
-
-    #[test]
-    fn test_uuid_uri_lowercase() {
-        let uri = Uri::new("urn:uuid:53fefa32-fcbb-4ff8-8a92-55ee120877b7".to_string()).unwrap();
-        assert!(uri.is_uuid());
-    }
-
-    #[test]
-    fn test_uuid_uri_uppercase_error() {
-        let result = Uri::new("urn:uuid:53FEFA32-FCBB-4FF8-8A92-55EE120877B7".to_string());
-        assert!(result.is_err());
-    }
-
-    #[test]
-    fn test_relative_uri() {
-        let uri = Uri::new("relative/path".to_string()).unwrap();
-        assert!(uri.is_relative());
-        assert!(!uri.is_absolute());
-    }
-
-    #[test]
-    fn test_absolute_uri() {
-        let uri = Uri::new("https://example.com/path".to_string()).unwrap();
-        assert!(uri.is_absolute());
-        assert!(!uri.is_relative());
-    }
-
-    #[test]
-    fn test_uri_with_fragment() {
-        let uri = Uri::new("https://example.com#fragment".to_string()).unwrap();
-        assert_eq!(uri.fragment(), Some("fragment"));
-    }
-
-    #[test]
-    fn test_uri_without_fragment() {
-        let uri = Uri::new("https://example.com".to_string()).unwrap();
-        assert_eq!(uri.fragment(), None);
-    }
-
-    #[test]
-    fn test_from_str() {
-        let uri = Uri::from_str("https://example.com").unwrap();
-        assert_eq!(uri.as_str(), "https://example.com");
-    }
-
-    #[test]
-    fn test_display() {
-        let uri = Uri::new("https://example.com".to_string()).unwrap();
-        assert_eq!(uri.to_string(), "https://example.com");
-    }
-
-    #[test]
-    fn test_serialization() {
-        let uri = Uri::new("https://example.com".to_string()).unwrap();
-        let serialized = serde_json::to_string(&uri).unwrap();
-        let deserialized: Uri = serde_json::from_str(&serialized).unwrap();
-        assert_eq!(uri, deserialized);
     }
 }

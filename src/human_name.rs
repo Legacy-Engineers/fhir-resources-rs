@@ -79,4 +79,14 @@ impl HumanName {
     pub fn set_period(&mut self, period: Option<String>) {
         self.period = period;
     }
+
+    /// Converts the HumanName to a JSON string.
+    pub fn to_json(&self) -> String {
+        serde_json::to_string(self).unwrap()
+    }
+
+    /// Converts a JSON string to a HumanName.
+    pub fn from_json(json: &str) -> Result<Self, serde_json::Error> {
+        serde_json::from_str(json)
+    }
 }
