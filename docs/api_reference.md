@@ -19,11 +19,14 @@ The `Patient` resource represents a person receiving healthcare services.
 
 ```rust
 pub struct Patient {
+    #[serde(rename = "resourceType")]
     resource_type: String,
     identifier: Vec<Identifier>,
     name: Vec<HumanName>,
 }
 ```
+
+**Note**: The field is named `resource_type` in Rust (snake_case) but serializes to `resourceType` in JSON (camelCase) to follow FHIR conventions.
 
 ### Methods
 
@@ -607,7 +610,7 @@ pub enum CodeError {
 
 ## Serialization
 
-All resources implement `Serialize` and `Deserialize` traits for JSON serialization.
+All resources implement `Serialize` and `Deserialize` traits for JSON serialization. The library follows FHIR conventions by using camelCase field names in JSON output (e.g., `resourceType`) while maintaining Rust naming conventions (snake_case) in the code.
 
 ### Example
 
@@ -620,6 +623,36 @@ println!("{}", json);
 
 // Deserialize
 let deserialized_patient: Patient = serde_json::from_str(&json).unwrap();
+```
+
+### JSON Output Example
+
+```json
+{
+  "resourceType": "Patient",
+  "identifier": [
+    {
+      "use": {
+        "value": "official"
+      },
+      "system": {
+        "value": "https://hospital.example.com/patients"
+      },
+      "value": "MRN12345",
+      "period": null
+    }
+  ],
+  "name": [
+    {
+      "use": "official",
+      "text": "Dr. John Smith",
+      "family": "Smith",
+      "given": ["John"],
+      "prefix": ["Dr."],
+      "suffix": []
+    }
+  ]
+}
 ```
 
 ## Traits Implemented

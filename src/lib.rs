@@ -1,6 +1,9 @@
 pub mod human_name;
 pub mod identifier;
 pub mod patient;
+pub mod patient_contact;
+pub mod patient_communication;
+pub mod patient_link;
 pub mod data_types;
 pub mod period;
 

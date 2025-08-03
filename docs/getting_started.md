@@ -62,6 +62,9 @@ fn main() {
     // Serialize to JSON
     let json = serde_json::to_string_pretty(&patient).unwrap();
     println!("{}", json);
+
+    // Note: The JSON output will use camelCase field names (e.g., "resourceType")
+    // to follow FHIR conventions, while the Rust code uses snake_case.
 }
 ```
 
